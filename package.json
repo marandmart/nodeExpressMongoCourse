@@ -6,6 +6,9 @@
   "repository": "https://github.com/marandmart/nodeExpressMongoCourse.git",
   "author": "Mario Andre <mario.andre.m@gmail.com>",
   "license": "MIT",
+  "scripts": {
+    "start": "nodemon server.js"
+  },
   "devDependencies": {
     "nodemon": "^2.0.21"
   },
