@@ -33,11 +33,18 @@ app.post("/livros", (req, res) => {
 });
 
 app.put("/livros/:id", (req, res) => {
-  let bookIndex = livros.findIndex(
+  const bookIndex = livros.findIndex(
     (livro) => livro.id == parseInt(req.params.id)
   );
   livros[bookIndex].titulo = req.body.titulo;
   res.json(livros);
+});
+
+app.delete("/livros/:id", (req, res) => {
+  const { id } = req.params;
+  const bookIndex = livros.findIndex((livro) => livro.id == parseInt(id));
+  livros.splice(bookIndex, 1);
+  res.send(`Livro com id ${id} removido`);
 });
 
 export default app;
