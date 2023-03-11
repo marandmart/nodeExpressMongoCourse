@@ -17,9 +17,7 @@ app.get("/", (req, res) => {
 app.get("/livros/:id", (req, res) => {
   if (/[\d]/g.test(req.params.id)) {
     const livro = livros.find((livro) => livro.id == parseInt(req.params.id));
-    if (livro) {
-      res.send(livro);
-    }
+    if (livro) res.send(livro);
     res.status(204).send();
   }
   res.status(400).send("Incorrect parameter");
