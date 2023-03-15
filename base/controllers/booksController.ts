@@ -44,11 +44,13 @@ class BooksController {
     await books
       .updateOne({ _id: bookId }, { $set: req.body })
       .catch(console.error)
-      .then((response) =>
-        response?.acknowledged
+      .then((response) => {
+        if (!response?.acknowledged)
+          res.status(400).send("Incorrect parametters");
+        response?.matchedCount === 1
           ? res.send("Book updated successfully")
-          : res.status(400).send("Something went wrong")
-      );
+          : res.status(400).send("Book id is incorrect or doesn't exist");
+      });
   };
 }
 
