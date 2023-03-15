@@ -40,10 +40,9 @@ class BooksController {
 
   static update = async (req: express.Request, res: express.Response) => {
     const bookId = req.params.id;
-    const { title, author, pageQnt } = new books(req.body);
 
     await books
-      .updateOne({ _id: bookId }, { title, author, pageQnt })
+      .updateOne({ _id: bookId }, { $set: req.body })
       .catch(console.error)
       .then((response) =>
         response?.acknowledged
