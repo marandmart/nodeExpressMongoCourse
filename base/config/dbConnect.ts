@@ -1,8 +1,9 @@
+import "dotenv/config";
 import mongoose from "mongoose";
 
-mongoose.connect(
-  "mongodb+srv://marandmar:kamtut-0wazde-peJwuj@basecluster.qrvu1rs.mongodb.net/curso-node"
-);
+const databaseURL = String(process.env.DATABASE_URL);
+
+mongoose.connect(databaseURL);
 
 let db = mongoose.connection;
 
