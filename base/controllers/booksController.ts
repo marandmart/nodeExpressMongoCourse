@@ -6,11 +6,17 @@ class BooksController {
     if (req.params.id) {
       await books
         .findOne({ _id: req.params.id })
+        .populate("author")
+        .exec()
         .catch(console.error)
         .then((book) => res.status(201).send(book?.toJSON()));
     } else {
       await books
         .find()
+        // author is the name of the variable inside the collection
+        // name is the field that I want to show
+        .populate("author", "name")
+        .exec()
         .catch(console.error)
         .then((books) => res.send(books));
     }
