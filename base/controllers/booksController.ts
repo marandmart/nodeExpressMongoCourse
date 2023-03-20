@@ -58,6 +58,18 @@ class BooksController {
           : res.status(400).send("Book id is incorrect or doesn't exist");
       });
   };
+
+  static searchBooksByAuthor = async (
+    req: express.Request,
+    res: express.Response
+  ) => {
+    await books
+      .find({ author: req.query.id })
+      .populate("author", "name")
+      .exec()
+      .catch(console.error)
+      .then((books) => res.send(books));
+  };
 }
 
 export default BooksController;
