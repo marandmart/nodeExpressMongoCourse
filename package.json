@@ -4,10 +4,11 @@
   "main": "index.js",
   "type": "module",
   "repository": "https://github.com/marandmart/nodeExpressMongoCourse.git",
-  "author": "Mario Andre <mario.andre.m@gmail.com>",
+  "author": "Mario Andre Martins <mario.andre.m@gmail.com>",
   "license": "MIT",
   "scripts": {
     "start": "nodemon server.js",
+    "cw": "npx tsc --watch",
     "c": "npx tsc"
   },
   "devDependencies": {

@@ -2,23 +2,32 @@ import books from "../models/Book.js";
 import express from "express";
 
 class BooksController {
-  static list = async (req: express.Request, res: express.Response) => {
-    if (req.params.id) {
-      await books
-        .findOne({ _id: req.params.id })
-        .populate("author")
-        .exec()
-        .catch(console.error)
-        .then((book) => res.status(201).send(book?.toJSON()));
-    } else {
-      await books
-        .find()
+  static list = async (
+    req: express.Request,
+    res: express.Response,
+    next: express.NextFunction
+  ) => {
+    try {
+      if (req.params.id) {
+        const book = await books
+          .findOne({ _id: req.params.id })
+          .populate("author")
+          .exec();
+        if (book !== null) {
+          res.status(201).send(book.toJSON());
+          return;
+        }
+        res.status(400).send({ message: "ID not found" });
+      } else {
         // author is the name of the variable inside the collection
         // name is the field that I want to show
-        .populate("author", "name")
-        .exec()
-        .catch(console.error)
-        .then((books) => res.send(books));
+        const allBooks = await books.find().populate("author", "name").exec();
+        if (allBooks !== null) {
+          res.status(201).send(allBooks);
+        }
+      }
+    } catch (error) {
+      next(error);
     }
   };
 
@@ -28,7 +37,7 @@ class BooksController {
     if (hasTitle && hasAuthor && hasPages) {
       await books
         .create(newBook)
-        .catch((error) => res.status(500).send({ message: error }))
+        .catch((error) => res.status(500).send({ message: error })) // mandar pro next
         .then(() => res.status(201).send(newBook.toJSON()));
     } else {
       res.status(400).send("Incorrect or incomplete information");
@@ -40,7 +49,7 @@ class BooksController {
 
     await books
       .deleteOne({ _id: bookId })
-      .catch(console.error)
+      .catch(console.error) // mandar pro next
       .then(() => res.send("Book removed successfully."));
   };
 
@@ -49,7 +58,7 @@ class BooksController {
 
     await books
       .updateOne({ _id: bookId }, { $set: req.body })
-      .catch(console.error)
+      .catch(console.error) // mandar pro next
       .then((response) => {
         if (!response?.acknowledged)
           res.status(400).send("Incorrect parametters");

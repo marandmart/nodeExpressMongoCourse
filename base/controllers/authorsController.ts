@@ -2,17 +2,27 @@ import authors from "../models/Author.js";
 import express from "express";
 
 class AuthorController {
-  static list = async (req: express.Request, res: express.Response) => {
-    if (req.params.id) {
-      await authors
-        .findOne({ _id: req.params.id })
-        .catch(console.error)
-        .then((author) => res.status(201).send(author?.toJSON()));
-    } else {
-      await authors
-        .find()
-        .catch(console.error)
-        .then((authors) => res.send(authors));
+  static list = async (
+    req: express.Request,
+    res: express.Response,
+    next: express.NextFunction
+  ) => {
+    try {
+      if (req.params.id) {
+        const author = await authors.findOne({ _id: req.params.id });
+        if (author !== null) {
+          res.status(201).send(author.toJSON());
+          return;
+        }
+        res.status(400).send({ message: "ID not found" });
+      } else {
+        const allAuthors = await authors.find();
+        if (allAuthors !== null) {
+          res.status(201).send(allAuthors);
+        }
+      }
+    } catch (error) {
+      next(error);
     }
   };
 
@@ -25,6 +35,7 @@ class AuthorController {
         .catch((error) => res.status(500).send({ message: error }))
         .then(() => res.status(201).send(newAuthor.toJSON()));
     } else {
+      // mandar pro next
       res.status(400).send("Incorrect or incomplete information");
     }
   };
@@ -34,7 +45,7 @@ class AuthorController {
 
     await authors
       .deleteOne({ _id: authorId })
-      .catch(console.error)
+      .catch(console.error) // mandar pro next
       .then(() => res.send("Author removed successfully."));
   };
 
@@ -43,7 +54,7 @@ class AuthorController {
 
     await authors
       .updateOne({ _id: authorId }, { $set: req.body })
-      .catch(console.error)
+      .catch(console.error) // mandar pro next
       .then((response) => {
         if (!response?.acknowledged)
           res.status(400).send("Incorrect parametters");

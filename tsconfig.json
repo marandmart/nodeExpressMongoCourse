@@ -7,7 +7,6 @@
     "removeComments": true,
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
-    "watch": true,
     "skipLibCheck": true
   }
 }
