@@ -10,6 +10,15 @@ export default function errorHandler(
   if (error instanceof mongoose.Error.CastError) {
     res.status(400).send({ message: "One or more data points are incorrect" });
     return;
+  } else if (error instanceof mongoose.Error.ValidationError) {
+    const errorMessages = Object.values(error.errors)
+      .map((error) => error.message)
+      .join(", ");
+    res
+      .status(400)
+      .send({
+        message: `Incorrect or incomplete information: ${errorMessages}`,
+      });
   }
   res.status(500).send({ message: "Server error" });
 }

@@ -26,27 +26,35 @@ class AuthorController {
     }
   };
 
-  static register = async (req: express.Request, res: express.Response) => {
+  static register = async (
+    req: express.Request,
+    res: express.Response,
+    next: express.NextFunction
+  ) => {
     const newAuthor = new authors(req.body);
-    const { name: hasName, nationality: hasNationality } = newAuthor;
-    if (hasName && hasNationality) {
-      await authors
-        .create(newAuthor)
-        .catch((error) => res.status(500).send({ message: error }))
-        .then(() => res.status(201).send(newAuthor.toJSON()));
-    } else {
-      // mandar pro next
-      res.status(400).send("Incorrect or incomplete information");
+    try {
+      const createdAuthor = await authors.create(newAuthor);
+      if (createdAuthor) {
+        res.status(201).send(newAuthor.toJSON());
+      }
+    } catch (error) {
+      next(error);
     }
   };
 
-  static delete = async (req: express.Request, res: express.Response) => {
+  static delete = async (
+    req: express.Request,
+    res: express.Response,
+    next: express.NextFunction
+  ) => {
     const authorId = req.params.id;
 
-    await authors
-      .deleteOne({ _id: authorId })
-      .catch(console.error) // mandar pro next
-      .then(() => res.send("Author removed successfully."));
+    try {
+      const deletedAuthor = await authors.deleteOne({ _id: authorId });
+      if (deletedAuthor) res.send("Author removed successfully.");
+    } catch (error) {
+      next(error);
+    }
   };
 
   static update = async (req: express.Request, res: express.Response) => {
