@@ -12,9 +12,8 @@ class AuthorController {
         const author = await authors.findOne({ _id: req.params.id });
         if (author !== null) {
           res.status(201).send(author.toJSON());
-          return;
         }
-        res.status(400).send({ message: "ID not found" });
+        res.status(204).send();
       } else {
         const allAuthors = await authors.find();
         if (allAuthors !== null) {
@@ -57,19 +56,24 @@ class AuthorController {
     }
   };
 
-  static update = async (req: express.Request, res: express.Response) => {
+  static update = async (
+    req: express.Request,
+    res: express.Response,
+    next: express.NextFunction
+  ) => {
     const authorId = req.params.id;
-
-    await authors
-      .updateOne({ _id: authorId }, { $set: req.body })
-      .catch(console.error) // mandar pro next
-      .then((response) => {
-        if (!response?.acknowledged)
-          res.status(400).send("Incorrect parametters");
-        response?.matchedCount === 1
-          ? res.send("Author updated successfully")
-          : res.status(400).send("Author id is incorrect or doesn't exist");
-      });
+    try {
+      const { matchedCount } = await authors.updateOne(
+        { _id: authorId },
+        { $set: req.body }
+      );
+      if (matchedCount === 1) {
+        res.send("Author updated successfully");
+      }
+      res.status(400).send();
+    } catch (error) {
+      next(error);
+    }
   };
 }
 

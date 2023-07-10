@@ -1,5 +1,8 @@
 import express from "express";
 import mongoose from "mongoose";
+import BaseError from "../errors/BaseError.js";
+import IncorrectRequest from "../errors/IncorrectRequest.js";
+import ValidationError from "../errors/ValidationError.js";
 
 export default function errorHandler(
   error: express.ErrorRequestHandler,
@@ -8,17 +11,9 @@ export default function errorHandler(
   next: express.NextFunction
 ): void {
   if (error instanceof mongoose.Error.CastError) {
-    res.status(400).send({ message: "One or more data points are incorrect" });
-    return;
+    new IncorrectRequest().sendResponse(res);
   } else if (error instanceof mongoose.Error.ValidationError) {
-    const errorMessages = Object.values(error.errors)
-      .map((error) => error.message)
-      .join(", ");
-    res
-      .status(400)
-      .send({
-        message: `Incorrect or incomplete information: ${errorMessages}`,
-      });
+    new ValidationError(error).sendResponse(res);
   }
-  res.status(500).send({ message: "Server error" });
+  new BaseError().sendResponse(res);
 }

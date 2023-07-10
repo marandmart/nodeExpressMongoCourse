@@ -3,8 +3,11 @@ import mongoose from "mongoose";
 const authorSchema = new mongoose.Schema(
   {
     id: { type: String },
-    name: { type: String, required: true },
-    nationality: { type: String, required: true },
+    name: { type: String, required: [true, "Name is a required field"] },
+    nationality: {
+      type: String,
+      required: [true, "Nationality is a required field"],
+    },
   },
   { versionKey: false }
 );
