@@ -1,3 +1,4 @@
+import NotFound from "../errors/NotFound.js";
 import books from "../models/Book.js";
 import express from "express";
 
@@ -16,7 +17,7 @@ class BooksController {
         if (book !== null) {
           res.status(201).send(book.toJSON());
         }
-        res.status(204).send();
+        next(new NotFound("Book not found"));
       } else {
         // author is the name of the variable inside the collection
         // name is the field that I want to show
@@ -57,6 +58,7 @@ class BooksController {
       if (deletedBook) {
         res.send("Book removed successfully.");
       }
+      next(new NotFound("Book not found"));
     } catch (error) {
       next(error);
     }
@@ -76,6 +78,7 @@ class BooksController {
       if (matchedCount === 1) {
         res.send("Book updated successfully");
       }
+      next(new NotFound("Book not found"));
     } catch (error) {
       next(error);
     }

@@ -1,3 +1,4 @@
+import NotFound from "../errors/NotFound.js";
 import authors from "../models/Author.js";
 import express from "express";
 
@@ -13,7 +14,7 @@ class AuthorController {
         if (author !== null) {
           res.status(201).send(author.toJSON());
         }
-        res.status(204).send();
+        next(new NotFound("Author not found"));
       } else {
         const allAuthors = await authors.find();
         if (allAuthors !== null) {
@@ -51,6 +52,7 @@ class AuthorController {
     try {
       const deletedAuthor = await authors.deleteOne({ _id: authorId });
       if (deletedAuthor) res.send("Author removed successfully.");
+      next(new NotFound("Author not found"));
     } catch (error) {
       next(error);
     }
@@ -70,7 +72,7 @@ class AuthorController {
       if (matchedCount === 1) {
         res.send("Author updated successfully");
       }
-      res.status(400).send();
+      next(new NotFound("Author not found"));
     } catch (error) {
       next(error);
     }
