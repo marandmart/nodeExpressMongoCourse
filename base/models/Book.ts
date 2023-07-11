@@ -2,7 +2,10 @@ import mongoose from "mongoose";
 
 const booksSchema = new mongoose.Schema({
   id: { type: String },
-  title: { type: String, required: [true, "Book title is a required field"] },
+  title: {
+    type: String,
+    required: [true, "Book title is a required field"],
+  },
   author: {
     type: String,
     ref: "authors",

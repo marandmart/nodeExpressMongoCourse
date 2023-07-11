@@ -7,6 +7,10 @@ const authorSchema = new mongoose.Schema(
     nationality: {
       type: String,
       required: [true, "Nationality is a required field"],
+      // enum: {
+      //   values: ["array of countries that are allowed"],
+      //   message: "Error message to display if information does not comply"
+      // }
     },
   },
   { versionKey: false }
