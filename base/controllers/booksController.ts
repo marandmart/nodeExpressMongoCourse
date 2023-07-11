@@ -1,4 +1,5 @@
 import NotFound from "../errors/NotFound.js";
+import authors from "../models/Author.js";
 import books from "../models/Book.js";
 import express from "express";
 
@@ -36,11 +37,15 @@ class BooksController {
     res: express.Response,
     next: express.NextFunction
   ) => {
-    const newBook = new books(req.body);
     try {
+      const { author } = req.body;
+      const authorInDatabase = await authors.findOne({ name: author });
+      if (!authorInDatabase) throw new NotFound("Author is not in database");
+      const { _id } = authorInDatabase;
+      const newBook = { ...req.body, author: _id };
       const newlyCreatedBook = await books.create(newBook);
       if (newlyCreatedBook) {
-        res.status(201).send(newBook.toJSON());
+        res.status(201).send(newlyCreatedBook.toJSON());
       }
     } catch (error) {
       next(error);
