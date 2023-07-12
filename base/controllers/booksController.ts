@@ -93,11 +93,29 @@ class BooksController {
     res: express.Response,
     next: express.NextFunction
   ) => {
-    const { id: author, title } = req.query;
-    const parameters = Object.fromEntries(
-      Object.entries({ author, title }).filter(([_, value]) => value)
-    );
+    const { author, title, minPages, maxPages } = req.query;
+    let authorId;
+
     try {
+      if (author) {
+        const authorInDatabase = await authors.findOne({
+          name: { $regex: author, $options: "i" },
+        });
+        if (!authorInDatabase) throw new NotFound("Author is not in database");
+        const { _id } = authorInDatabase;
+        authorId = _id;
+      }
+
+      const parameters = Object.fromEntries(
+        Object.entries({
+          author: authorId,
+          title: title && { $regex: title, $options: "i" },
+          pageQnt:
+            (maxPages && minPages && { $gte: minPages, $lte: maxPages }) ||
+            (minPages && { $gte: minPages }) ||
+            (maxPages && { $lte: maxPages }),
+        }).filter(([_, value]) => value)
+      );
       const searchResult = await books
         .find(parameters)
         .populate("author", "name")
