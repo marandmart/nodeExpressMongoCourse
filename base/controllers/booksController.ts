@@ -88,18 +88,22 @@ class BooksController {
     }
   };
 
-  static searchBooksByAuthor = async (
+  static searchBooks = async (
     req: express.Request,
     res: express.Response,
     next: express.NextFunction
   ) => {
+    const { id: author, title } = req.query;
+    const parameters = Object.fromEntries(
+      Object.entries({ author, title }).filter(([_, value]) => value)
+    );
     try {
-      const authorBooks = await books
-        .find({ author: req.query.id })
+      const searchResult = await books
+        .find(parameters)
         .populate("author", "name")
         .exec();
-      if (authorBooks) {
-        res.send(authorBooks);
+      if (searchResult) {
+        res.send(searchResult);
       }
     } catch (error) {
       next(error);

@@ -1,5 +1,4 @@
-import express from "express";
-import { Application } from "express-serve-static-core";
+import express, { Application } from "express";
 import books from "./booksRoutes.js";
 import authors from "./authorsRoutes.js";
 
