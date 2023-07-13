@@ -1,6 +1,7 @@
 import NotFound from "../errors/NotFound.js";
 import { authors, books } from "../models/index.js";
 import express from "express";
+import { isEmptyObject } from "../utils/index.js";
 
 class BooksController {
   static list = async (
@@ -101,9 +102,10 @@ class BooksController {
         const authorInDatabase = await authors.findOne({
           name: { $regex: author, $options: "i" },
         });
-        if (!authorInDatabase) throw new NotFound("Author is not in database");
-        const { _id } = authorInDatabase;
-        authorId = _id;
+        if (authorInDatabase) {
+          const { _id } = authorInDatabase;
+          authorId = _id;
+        }
       }
 
       const parameters = Object.fromEntries(
@@ -116,6 +118,9 @@ class BooksController {
             (maxPages && { $lte: maxPages }),
         }).filter(([_, value]) => value)
       );
+
+      if (isEmptyObject(parameters)) res.send([]);
+
       const searchResult = await books
         .find(parameters)
         .populate("author", "name")
