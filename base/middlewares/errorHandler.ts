@@ -3,7 +3,6 @@ import mongoose from "mongoose";
 import BaseError from "../errors/BaseError.js";
 import IncorrectRequest from "../errors/IncorrectRequest.js";
 import ValidationError from "../errors/ValidationError.js";
-import NotFound from "../errors/NotFound.js";
 
 export default function errorHandler(
   error: express.ErrorRequestHandler,
@@ -15,7 +14,7 @@ export default function errorHandler(
     new IncorrectRequest().sendResponse(res);
   } else if (error instanceof mongoose.Error.ValidationError) {
     new ValidationError(error).sendResponse(res);
-  } else if (error instanceof NotFound) {
+  } else if (error instanceof BaseError) {
     error.sendResponse(res);
   }
   new BaseError().sendResponse(res);

@@ -2,6 +2,8 @@ import NotFound from "../errors/NotFound.js";
 import { authors, books } from "../models/index.js";
 import express from "express";
 import { isEmptyObject } from "../utils/index.js";
+import IncorrectRequest from "../errors/IncorrectRequest.js";
+import { SortOrder } from "mongoose";
 
 class BooksController {
   static list = async (
@@ -20,9 +22,31 @@ class BooksController {
         }
         next(new NotFound("Book not found"));
       } else {
-        // author is the name of the variable inside the collection
-        // name is the field that I want to show
-        const allBooks = await books.find().populate("author", "name").exec();
+        const { limit = 5, page = 1, ordering = "_id:-1" } = req.query;
+
+        const [field, order] = String(ordering).split(":");
+        if (
+          Number(limit) <= 0 ||
+          Number(page) <= 0 ||
+          Number.isNaN(Number(limit)) ||
+          Number.isNaN(Number(page)) ||
+          (Number(order) !== 1 && Number(order) !== -1)
+        )
+          next(new IncorrectRequest());
+
+        const sortObj = {
+          [field]: Number(order) as SortOrder,
+        };
+
+        const allBooks = await books
+          .find()
+          .sort(sortObj)
+          .skip((Number(page) - 1) * Number(limit))
+          .limit(Number(limit))
+          // author is the name of the variable inside the collection
+          // name is the field that I want to show
+          .populate("author", "name")
+          .exec();
         if (allBooks !== null) {
           res.status(201).send(allBooks);
         }
