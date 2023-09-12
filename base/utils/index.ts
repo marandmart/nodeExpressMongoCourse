@@ -33,7 +33,7 @@ export async function paginateResponse<T>(
   res: Response,
   next: NextFunction,
   model: Model<T>,
-  populateField?: string,
+  populateField: string = "",
   fieldNames?: string[]
 ) {
   if (queryParamsNotValid(req)) next(new IncorrectRequest());
@@ -48,31 +48,13 @@ export async function paginateResponse<T>(
 
   const skip = (Number(page) - 1) * Number(limit);
 
-  let allItems = [];
-
-  if (populateField && fieldNames && fieldNames.length > 0)
-    allItems = await model
-      .find()
-      .sort(sortObj)
-      .skip(skip)
-      .limit(Number(limit))
-      .populate(populateField, fieldNames)
-      .exec();
-  else if (populateField)
-    allItems = await model
-      .find()
-      .sort(sortObj)
-      .skip(skip)
-      .limit(Number(limit))
-      .populate(populateField)
-      .exec();
-  else
-    allItems = await model
-      .find()
-      .sort(sortObj)
-      .skip(skip)
-      .limit(Number(limit))
-      .exec();
+  let allItems = await model
+    .find()
+    .sort(sortObj)
+    .skip(skip)
+    .limit(Number(limit))
+    .populate(populateField, fieldNames)
+    .exec();
 
   if (allItems.length > 0) {
     return res.status(201).json(allItems);
