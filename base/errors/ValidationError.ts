@@ -5,7 +5,7 @@ class ValidationError extends IncorrectRequest {
   constructor(error: mongoose.Error.ValidationError) {
     const errorMessages = Object.values(error.errors)
       .map((error) => error.message)
-      .join(", ");
+      .join(". ");
     super(`Incorrect or incomplete information: ${errorMessages}`);
   }
 }

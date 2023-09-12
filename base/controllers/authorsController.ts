@@ -1,6 +1,8 @@
+import BaseError from "../errors/BaseError.js";
 import NotFound from "../errors/NotFound.js";
 import { authors } from "../models/index.js";
 import express from "express";
+import { paginateResponse } from "../utils/index.js";
 
 class AuthorController {
   static list = async (
@@ -11,15 +13,12 @@ class AuthorController {
     try {
       if (req.params.id) {
         const author = await authors.findOne({ _id: req.params.id });
-        if (author !== null) {
-          res.status(201).send(author.toJSON());
-        }
-        next(new NotFound("Author not found"));
+
+        author !== null
+          ? res.status(201).send(author.toJSON())
+          : next(new NotFound("Author not found"));
       } else {
-        const allAuthors = await authors.find();
-        if (allAuthors !== null) {
-          res.status(201).send(allAuthors);
-        }
+        paginateResponse(req, res, next, authors);
       }
     } catch (error) {
       next(error);
@@ -50,9 +49,13 @@ class AuthorController {
     const authorId = req.params.id;
 
     try {
-      const deletedAuthor = await authors.deleteOne({ _id: authorId });
-      if (deletedAuthor) res.send("Author removed successfully.");
-      next(new NotFound("Author not found"));
+      const { acknowledged, deletedCount } = await authors.deleteOne({
+        _id: authorId,
+      });
+      if (!acknowledged) return next(new BaseError());
+
+      if (deletedCount === 1) res.send("Author removed successfully.");
+      else next(new NotFound("Author not found"));
     } catch (error) {
       next(error);
     }

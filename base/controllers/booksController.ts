@@ -2,8 +2,7 @@ import NotFound from "../errors/NotFound.js";
 import { authors, books } from "../models/index.js";
 import express from "express";
 import { isEmptyObject } from "../utils/index.js";
-import IncorrectRequest from "../errors/IncorrectRequest.js";
-import { SortOrder } from "mongoose";
+import { paginateResponse } from "../utils/index.js";
 
 class BooksController {
   static list = async (
@@ -18,38 +17,11 @@ class BooksController {
           .populate("author")
           .exec();
         if (book !== null) {
-          res.status(201).send(book.toJSON());
+          return res.status(201).send(book.toJSON());
         }
         next(new NotFound("Book not found"));
       } else {
-        const { limit = 5, page = 1, ordering = "_id:-1" } = req.query;
-
-        const [field, order] = String(ordering).split(":");
-        if (
-          Number(limit) <= 0 ||
-          Number(page) <= 0 ||
-          Number.isNaN(Number(limit)) ||
-          Number.isNaN(Number(page)) ||
-          (Number(order) !== 1 && Number(order) !== -1)
-        )
-          next(new IncorrectRequest());
-
-        const sortObj = {
-          [field]: Number(order) as SortOrder,
-        };
-
-        const allBooks = await books
-          .find()
-          .sort(sortObj)
-          .skip((Number(page) - 1) * Number(limit))
-          .limit(Number(limit))
-          // author is the name of the variable inside the collection
-          // name is the field that I want to show
-          .populate("author", "name")
-          .exec();
-        if (allBooks !== null) {
-          res.status(201).send(allBooks);
-        }
+        paginateResponse(req, res, next, books, "author", ["name"]);
       }
     } catch (error) {
       next(error);
@@ -63,14 +35,11 @@ class BooksController {
   ) => {
     try {
       const { author } = req.body;
-      const authorInDatabase = await authors.findOne({ name: author });
+      const authorInDatabase = await authors.findById(author);
       if (!authorInDatabase) throw new NotFound("Author is not in database");
-      const { _id } = authorInDatabase;
-      const newBook = { ...req.body, author: _id };
+      const newBook = { ...req.body };
       const newlyCreatedBook = await books.create(newBook);
-      if (newlyCreatedBook) {
-        res.status(201).send(newlyCreatedBook.toJSON());
-      }
+      if (newlyCreatedBook) res.status(201).send(newlyCreatedBook.toJSON());
     } catch (error) {
       next(error);
     }
@@ -156,6 +125,8 @@ class BooksController {
       next(error);
     }
   };
+
+  // TODO: criar metodo de busca por editora
 }
 
 export default BooksController;

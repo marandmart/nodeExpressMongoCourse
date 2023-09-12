@@ -9,7 +9,7 @@ const routes = (app: Application) => {
       res.send({ title: "Curso de Node" })
     );
 
-  app.use(express.json(), books, authors);
+  app.use(books, authors);
 };
 
 export default routes;
